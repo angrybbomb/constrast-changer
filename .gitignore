@@ -4,6 +4,7 @@
 
 # Xcode
 #
+ios/opencv2.framework
 build/
 *.pbxuser
 !default.pbxuser
