@@ -61,6 +61,41 @@ RCT_EXPORT_METHOD(concatenateVertically:(NSArray *)imagesAsBase64 callback:(RCTR
   callback(@[[NSNull null], array]);
 }
 
+RCT_EXPORT_METHOD(changeImageContrast:(NSString *)imageAsBase64 callback:(RCTResponseSenderBlock)callback) {
+  UIImage* image = [self decodeBase64ToImage:imageAsBase64];
+  
+  cv::Mat matImage = [self convertUIImageToCVMat:image];
+
+  CGFloat cols = image.size.width;
+  CGFloat rows = image.size.height;
+  cv::Mat new_image = cv::Mat::zeros(rows, cols, CV_8UC4);
+
+  double alpha = 1.0; /*< Simple contrast control */
+  int beta = 0;       /*< Simple brightness control */
+
+  for (int y = 0; y < rows; y++ ) {
+        for (int x = 0; x < cols; x++ ) {
+          for( int c = 0; c < image.channels(); c++ ) {
+            new_image.at<cv::Vec3b>(y,x) = cv::saturate_cast<uchar>( alpha*image.at<cv::Vec3b>(y,x) + beta );
+          }
+        }
+    }
+
+
+  cv::Mat dst;
+  
+  cv::vconcat(matImage1, matImage2, dst);
+  
+  UIImage* new_imageUI = [self UIImageFromCVMat:new_image];
+  
+  NSString* new_imageBase64 = [self encodeToBase64String:new_imageUI];
+  
+  id object = { new_imageBase64 };
+  NSArray *array = [NSArray arrayWithObject:object];
+  
+  callback(@[[NSNull null], array]);
+}
+
 - (UIImage *)UIImageFromCVMat:(cv::Mat)cvMat {
   NSData *data = [NSData dataWithBytes:cvMat.data length:cvMat.elemSize()*cvMat.total()];
   
@@ -103,6 +138,11 @@ RCT_EXPORT_METHOD(concatenateVertically:(NSArray *)imagesAsBase64 callback:(RCTR
   return finalImage;
 }
 
+- (UIImage *)decodeBase64ToImage:(NSString *)strEncodeData {
+  NSData *data = [[NSData alloc]initWithBase64EncodedString:strEncodeData options:NSDataBase64DecodingIgnoreUnknownCharacters];
+  return [UIImage imageWithData:data];
+}
+
 - (cv::Mat)cvMatFromUIImage:(UIImage *)image {
   CGColorSpaceRef colorSpace = CGImageGetColorSpace(image.CGImage);
   CGFloat cols = image.size.width;
@@ -140,11 +180,6 @@ RCT_EXPORT_METHOD(concatenateVertically:(NSArray *)imagesAsBase64 callback:(RCTR
 
 - (NSString *)encodeToBase64String:(UIImage *)image {
   return [UIImagePNGRepresentation(image) base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
-}
-
-- (UIImage *)decodeBase64ToImage:(NSString *)strEncodeData {
-  NSData *data = [[NSData alloc]initWithBase64EncodedString:strEncodeData options:NSDataBase64DecodingIgnoreUnknownCharacters];
-  return [UIImage imageWithData:data];
 }
 
 - (cv::Mat)convertUIImageToCVMat:(UIImage *)image {
