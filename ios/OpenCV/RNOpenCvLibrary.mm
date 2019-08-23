@@ -9,69 +9,59 @@
 }
 RCT_EXPORT_MODULE()
 
-RCT_EXPORT_METHOD(concatenateHorizontally:(NSArray *)imagesAsBase64 callback:(RCTResponseSenderBlock)callback) {
-  UIImage* image1 = [self decodeBase64ToImage:imagesAsBase64[0]];
-  UIImage* image2 = [self decodeBase64ToImage:imagesAsBase64[1]];
-
-  cv::Mat matImage1 = [self cvMatFromUIImage:image1];
-  cv::Mat matImage2 = [self cvMatFromUIImage:image2];
-  cv::Mat dst;
-
-  cv::hconcat(matImage1, matImage2, dst);
-  
-  UIImage* dstUI = [self UIImageFromCVMat:dst];
-  
-  NSString* dstBase64 = [self encodeToBase64String:dstUI];
-  
-  id object = { dstBase64 };
-  NSArray *array = [NSArray arrayWithObject:object];
-  
-  callback(@[[NSNull null], array]);
-}
-
-RCT_EXPORT_METHOD(concatenateVertically:(NSArray *)imagesAsBase64 callback:(RCTResponseSenderBlock)callback) {
-  UIImage* image1 = [self decodeBase64ToImage:imagesAsBase64[0]];
-  UIImage* image2 = [self decodeBase64ToImage:imagesAsBase64[1]];
-  
-  cv::Mat matImage1 = [self cvMatFromUIImage:image1];
-  cv::Mat matImage2 = [self cvMatFromUIImage:image2];
-  cv::Mat dst;
-  
-  cv::vconcat(matImage1, matImage2, dst);
-  
-  UIImage* dstUI = [self UIImageFromCVMat:dst];
-  
-  NSString* dstBase64 = [self encodeToBase64String:dstUI];
-  
-  id object = { dstBase64 };
-  NSArray *array = [NSArray arrayWithObject:object];
-  
-  callback(@[[NSNull null], array]);
-}
-
 RCT_EXPORT_METHOD(changeImageContrast:(NSString *)imageAsBase64 alpha:(double)alpha callback:(RCTResponseSenderBlock)callback) {
-  UIImage* image = [self decodeBase64ToImage:imageAsBase64];
+  UIImage* imageUI = [self decodeBase64ToImage:imageAsBase64];
   
-  cv::Mat matImage = [self cvMatFromUIImage:image];
+  cv::Mat matImage = [self cvMatFromUIImage:imageUI];
+  matImage.convertTo(matImage, matImage.type(), alpha, 0);
 
-  cv::Mat new_matImage = cv::Mat::zeros(matImage.size(), matImage.type());
-
-  for (int y = 0; y < matImage.rows; y++ ) {
-    for (int x = 0; x < matImage.cols; x++ ) {
-      for( int c = 0; c < matImage.channels(); c++ ) {
-        new_matImage.at<cv::Vec3b>(y,x)[c] = cv::saturate_cast<uchar>( alpha*matImage.at<cv::Vec3b>(y,x)[c] );
-      }
-    }
-  }
-
-  UIImage* new_imageUI = [self UIImageFromCVMat:new_matImage];
-  
+  UIImage* new_imageUI = [self UIImageFromCVMat:matImage];
   NSString* dstBase64 = [self encodeToBase64String:new_imageUI];
   
   id object = { dstBase64 };
   NSArray *array = [NSArray arrayWithObject:object];
   
   callback(@[[NSNull null], array]);
+}
+
+- (UIImage *)decodeBase64ToImage:(NSString *)strEncodeData {
+  NSData *data = [[NSData alloc]initWithBase64EncodedString:strEncodeData options:NSDataBase64DecodingIgnoreUnknownCharacters];
+  return [UIImage imageWithData:data];
+}
+
+- (cv::Mat)cvMatFromUIImage:(UIImage *)image {
+  CGColorSpaceRef colorSpace = CGImageGetColorSpace(image.CGImage);
+  CGFloat cols = image.size.width;
+  CGFloat rows = image.size.height;
+  
+  if  (image.imageOrientation == UIImageOrientationLeft
+       || image.imageOrientation == UIImageOrientationRight) {
+    cols = image.size.height;
+    rows = image.size.width;
+  }
+  
+  cv::Mat cvMat(rows, cols, CV_8UC4); // 8 bits per component, 4 channels (color channels + alpha)
+  
+  CGContextRef contextRef = CGBitmapContextCreate(cvMat.data,                 // Pointer to  data
+                                                  cols,                       // Width of bitmap
+                                                  rows,                       // Height of bitmap
+                                                  8,                          // Bits per component
+                                                  cvMat.step[0],              // Bytes per row
+                                                  colorSpace,                 // Colorspace
+                                                  kCGImageAlphaNoneSkipLast |
+                                                  kCGBitmapByteOrderDefault); // Bitmap info flags
+  
+  CGContextDrawImage(contextRef, CGRectMake(0, 0, cols, rows), image.CGImage);
+  CGContextRelease(contextRef);
+  CGColorSpaceRelease(colorSpace);
+  
+  //--swap channels -- //
+  std::vector<cv::Mat> ch;
+  cv::split(cvMat,ch);
+  std::swap(ch[0],ch[2]);
+  cv::merge(ch,cvMat);
+  
+  return cvMat;
 }
 
 - (UIImage *)UIImageFromCVMat:(cv::Mat)cvMat {
@@ -114,46 +104,6 @@ RCT_EXPORT_METHOD(changeImageContrast:(NSString *)imageAsBase64 alpha:(double)al
   CGColorSpaceRelease(colorSpace);
   
   return finalImage;
-}
-
-- (UIImage *)decodeBase64ToImage:(NSString *)strEncodeData {
-  NSData *data = [[NSData alloc]initWithBase64EncodedString:strEncodeData options:NSDataBase64DecodingIgnoreUnknownCharacters];
-  return [UIImage imageWithData:data];
-}
-
-- (cv::Mat)cvMatFromUIImage:(UIImage *)image {
-  CGColorSpaceRef colorSpace = CGImageGetColorSpace(image.CGImage);
-  CGFloat cols = image.size.width;
-  CGFloat rows = image.size.height;
-  
-  if  (image.imageOrientation == UIImageOrientationLeft
-       || image.imageOrientation == UIImageOrientationRight) {
-    cols = image.size.height;
-    rows = image.size.width;
-  }
-  
-  cv::Mat cvMat(rows, cols, CV_8UC4); // 8 bits per component, 4 channels (color channels + alpha)
-  
-  CGContextRef contextRef = CGBitmapContextCreate(cvMat.data,                 // Pointer to  data
-                                                  cols,                       // Width of bitmap
-                                                  rows,                       // Height of bitmap
-                                                  8,                          // Bits per component
-                                                  cvMat.step[0],              // Bytes per row
-                                                  colorSpace,                 // Colorspace
-                                                  kCGImageAlphaNoneSkipLast |
-                                                  kCGBitmapByteOrderDefault); // Bitmap info flags
-  
-  CGContextDrawImage(contextRef, CGRectMake(0, 0, cols, rows), image.CGImage);
-  CGContextRelease(contextRef);
-  CGColorSpaceRelease(colorSpace);
-  
-  //--swap channels -- //
-  std::vector<cv::Mat> ch;
-  cv::split(cvMat,ch);
-  std::swap(ch[0],ch[2]);
-  cv::merge(ch,cvMat);
-  
-  return cvMat;
 }
 
 - (NSString *)encodeToBase64String:(UIImage *)image {
