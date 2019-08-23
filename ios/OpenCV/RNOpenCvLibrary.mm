@@ -61,21 +61,17 @@ RCT_EXPORT_METHOD(concatenateVertically:(NSArray *)imagesAsBase64 callback:(RCTR
   callback(@[[NSNull null], array]);
 }
 
-RCT_EXPORT_METHOD(changeImageContrast:(NSString *)imageAsBase64 callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(changeImageContrast:(NSString *)imageAsBase64 alpha:(double)alpha callback:(RCTResponseSenderBlock)callback) {
   UIImage* image = [self decodeBase64ToImage:imageAsBase64];
   
   cv::Mat matImage = [self convertUIImageToCVMat:image];
 
   cv::Mat new_matImage = cv::Mat::zeros(matImage.size(), matImage.type());
 
-  double alpha = 0.5;
-  // double alpha = 1.0; /*< Simple contrast control */
-  int beta = 0;       /*< Simple brightness control */
-
   for (int y = 0; y < matImage.rows; y++ ) {
     for (int x = 0; x < matImage.cols; x++ ) {
       for( int c = 0; c < matImage.channels(); c++ ) {
-        new_matImage.at<cv::Vec3b>(y,x)[c] = cv::saturate_cast<uchar>( alpha*matImage.at<cv::Vec3b>(y,x)[c] + beta );
+        new_matImage.at<cv::Vec3b>(y,x)[c] = cv::saturate_cast<uchar>( alpha*matImage.at<cv::Vec3b>(y,x)[c] );
       }
     }
   }

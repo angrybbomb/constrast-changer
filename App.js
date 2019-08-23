@@ -25,9 +25,8 @@ export default class App extends Component<Props> {
     console.log('TCL: App -> changeImageContrast -> imageAsBase64 (incoming)', imageAsBase64)
 
     return new Promise((resolve, reject) => {
-      OpenCV.changeImageContrast(imageAsBase64, (error, dataArray) => {
+      OpenCV.changeImageContrast(imageAsBase64, 0.6, (error, dataArray) => {
         console.log('TCL: App -> changeImageContrast JS -> dataArray (recived): ', dataArray)
-        // resolve()
         resolve(dataArray[0])
       })
     })
@@ -51,8 +50,9 @@ export default class App extends Component<Props> {
       return (
         <View style={styles.container}>
           <Image
-            style={{ flex: 1, height: 300, width: 300, backgroundColor: 'red' }}
+            style={{ height: 300, width: 300, backgroundColor: 'red' }}
             source={{ uri: `data:image/png;base64,${processedImage64}` }}
+            resizeMode="contain"
           />
         </View>
       )
