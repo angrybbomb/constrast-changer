@@ -66,31 +66,26 @@ RCT_EXPORT_METHOD(changeImageContrast:(NSString *)imageAsBase64 callback:(RCTRes
   
   cv::Mat matImage = [self convertUIImageToCVMat:image];
 
-  CGFloat cols = image.size.width;
-  CGFloat rows = image.size.height;
-  cv::Mat new_image = cv::Mat::zeros(rows, cols, CV_8UC4);
+  cv::Mat new_matImage = cv::Mat::zeros(matImage.size(), matImage.type());
 
-  double alpha = 1.0; /*< Simple contrast control */
+  double alpha = 0.5;
+  // double alpha = 1.0; /*< Simple contrast control */
   int beta = 0;       /*< Simple brightness control */
 
-  for (int y = 0; y < rows; y++ ) {
-        for (int x = 0; x < cols; x++ ) {
-          for( int c = 0; c < image.channels(); c++ ) {
-            new_image.at<cv::Vec3b>(y,x) = cv::saturate_cast<uchar>( alpha*image.at<cv::Vec3b>(y,x) + beta );
-          }
-        }
+  for (int y = 0; y < matImage.rows; y++ ) {
+    for (int x = 0; x < matImage.cols; x++ ) {
+      for( int c = 0; c < matImage.channels(); c++ ) {
+        new_matImage.at<cv::Vec3b>(y,x)[c] = cv::saturate_cast<uchar>( alpha*matImage.at<cv::Vec3b>(y,x)[c] + beta );
+      }
     }
+  }
 
-
-  cv::Mat dst;
+  UIImage* new_imageUI = [self UIImageFromCVMat:new_matImage];
   
-  cv::vconcat(matImage1, matImage2, dst);
+  NSString* dstBase64 = [self encodeToBase64String:new_imageUI];
+  // NSString* dstBase64 = @"Hello from Native C0de!!!";
   
-  UIImage* new_imageUI = [self UIImageFromCVMat:new_image];
-  
-  NSString* new_imageBase64 = [self encodeToBase64String:new_imageUI];
-  
-  id object = { new_imageBase64 };
+  id object = { dstBase64 };
   NSArray *array = [NSArray arrayWithObject:object];
   
   callback(@[[NSNull null], array]);
