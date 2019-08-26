@@ -8,6 +8,7 @@
 
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, Image, Alert } from 'react-native'
+import RNFS from 'react-native-fs'
 import Slider from 'react-native-slider'
 import OpenCV from './NativeModules/OpenCV'
 
@@ -18,13 +19,25 @@ export default class App extends Component<Props> {
     contrastValue: 1,
   }
 
+  async componentDidMount() {
+    try {
+      console.log('TCL: App -> componentDidMount -> RNFS', RNFS)
+
+      testData = await RNFS.readDir(RNFS.MainBundlePath)
+      console.log('TCL: App -> componentDidMount -> testData', testData)
+
+      // base64data = await RNFS.readFile('./assets/drivers-license.jpg', 'base64').then()
+      // this.setState({ processedImage64: base64data })
+    } catch (error) {
+      console.log('TCL: App -> componentDidMount -> error', error)
+    }
+  }
+
   changeImageContrast(imageAsBase64) {
     const { contrastValue } = this.state
-    console.log('TCL: App -> changeImageContrast -> imageAsBase64 (incoming)', imageAsBase64)
 
     return new Promise((resolve, reject) => {
       OpenCV.changeImageContrast(imageAsBase64, contrastValue, (error, dataArray) => {
-        console.log('TCL: App -> changeImageContrast JS -> dataArray (recived): ', dataArray)
         resolve(dataArray[0])
       })
     })
@@ -37,7 +50,6 @@ export default class App extends Component<Props> {
   onValueChange = contrastValue =>
     this.setState({ contrastValue }, () => {
       this.changeImageContrast(TEST_IMAGE_BASE64).then(data => {
-        console.log('TCL: App -> onValueChange -> data', data)
         if (data) {
           this.setState({ processedImage64: data })
         }
