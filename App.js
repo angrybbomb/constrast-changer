@@ -12,6 +12,8 @@ import RNFS from 'react-native-fs'
 import Slider from 'react-native-slider'
 import OpenCV from './NativeModules/OpenCV'
 
+const TestPicture = require('./assets/images/drivers-license.jpg')
+
 type Props = {}
 export default class App extends Component<Props> {
   state = {
@@ -23,11 +25,10 @@ export default class App extends Component<Props> {
     try {
       console.log('TCL: App -> componentDidMount -> RNFS', RNFS)
 
-      testData = await RNFS.readDir(RNFS.MainBundlePath)
-      console.log('TCL: App -> componentDidMount -> testData', testData)
+      let imgUri = await TestPicture.resolveAssetSource(photo)
+      let testData = await RNFS.readFile(imgUri, 'base64')
 
-      // base64data = await RNFS.readFile('./assets/drivers-license.jpg', 'base64').then()
-      // this.setState({ processedImage64: base64data })
+      this.setState({ processedImage64: base64data })
     } catch (error) {
       console.log('TCL: App -> componentDidMount -> error', error)
     }
@@ -47,8 +48,8 @@ export default class App extends Component<Props> {
     Alert.alert('Current Contrast Value', `${this.state.contrastValue}`)
   }
 
-  onValueChange = contrastValue =>
-    this.setState({ contrastValue }, () => {
+  onValueChange = value =>
+    this.setState({ contrastValue: +value.toFixed(1) }, () => {
       this.changeImageContrast(TEST_IMAGE_BASE64).then(data => {
         if (data) {
           this.setState({ processedImage64: data })
