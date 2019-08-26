@@ -28,7 +28,7 @@ export default class App extends Component<Props> {
       let imgUri = await Image.resolveAssetSource(TestPicture)
       let testData = await RNFS.readFile(imgUri, 'base64')
 
-      this.setState({ processedImage64: base64data })
+      this.setState({ processedImage64: testData })
     } catch (error) {
       console.log('TCL: App -> componentDidMount -> error', error)
     }
