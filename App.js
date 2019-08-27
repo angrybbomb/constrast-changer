@@ -7,7 +7,7 @@
  */
 
 import React, { Component } from 'react'
-import { StyleSheet, Text, View, TouchableOpacity, Image, ImageEditor, ImageStore, Alert } from 'react-native'
+import { Platform, StyleSheet, Text, View, TouchableOpacity, Image, ImageEditor, ImageStore, Alert } from 'react-native'
 import Slider from 'react-native-slider'
 import OpenCV from './NativeModules/OpenCV'
 
@@ -17,6 +17,7 @@ type Props = {}
 export default class App extends Component<Props> {
   state = {
     initialImage: null,
+    localImageTag: null,
     processedImage64: null,
     contrastValue: 1,
   }
@@ -35,6 +36,7 @@ export default class App extends Component<Props> {
               size: { width, height },
             },
             croppedUri => {
+              this.setState({ localImageTag: croppedUri })
               ImageStore.getBase64ForTag(
                 croppedUri,
                 localImgBase64 => {
@@ -59,13 +61,30 @@ export default class App extends Component<Props> {
     }
   }
 
+  componentWillUnmount() {
+    ImageStore.removeImageForTag(this.state.localImageTag)
+  }
+
   changeImageContrast(imageAsBase64) {
     const { contrastValue } = this.state
 
     return new Promise((resolve, reject) => {
-      OpenCV.changeImageContrast(imageAsBase64, contrastValue, (error, dataArray) => {
-        resolve(dataArray[0])
-      })
+      if (Platform.OS === 'android') {
+        OpenCV.changeImageContrast(
+          imageAsBase64,
+          contrastValue,
+          error => {
+            console.log('TCL: App -> changeImageContrast -> error', error)
+          },
+          msg => {
+            resolve(msg)
+          }
+        )
+      } else {
+        OpenCV.changeImageContrast(imageAsBase64, contrastValue, (error, dataArray) => {
+          resolve(dataArray[0])
+        })
+      }
     })
   }
 
@@ -88,9 +107,7 @@ export default class App extends Component<Props> {
 
     return (
       <View style={styles.container}>
-        <TouchableOpacity onPress={this.testMethod}>
-          <Text style={styles.title}>Change Contrast</Text>
-        </TouchableOpacity>
+        <Text style={styles.title}>Change Contrast</Text>
         <Text style={styles.title}>{contrastValue}</Text>
         <Slider
           style={styles.slider}
