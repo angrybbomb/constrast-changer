@@ -8,7 +8,6 @@
 
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, Image, ImageEditor, ImageStore, Alert } from 'react-native'
-import RNFS from 'react-native-fs'
 import Slider from 'react-native-slider'
 import OpenCV from './NativeModules/OpenCV'
 
