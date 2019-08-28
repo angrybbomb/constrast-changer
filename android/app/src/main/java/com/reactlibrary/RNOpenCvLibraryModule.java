@@ -8,7 +8,6 @@ import com.facebook.react.bridge.Callback;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
 import org.opencv.android.Utils;
