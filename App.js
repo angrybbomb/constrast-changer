@@ -6,12 +6,14 @@
  * @flow
  */
 
+import _ from 'lodash'
 import React, { Component } from 'react'
 import { Platform, StyleSheet, Text, View, TouchableOpacity, Image, ImageEditor, ImageStore, Alert } from 'react-native'
 import Slider from 'react-native-slider'
 import OpenCV from './NativeModules/OpenCV'
 
 const TestPicture = require('./assets/images/drivers-license.jpg')
+const SLIDER_VALUE_DELAY = 150
 
 type Props = {}
 export default class App extends Component<Props> {
@@ -65,9 +67,7 @@ export default class App extends Component<Props> {
     ImageStore.removeImageForTag(this.state.localImageTag)
   }
 
-  changeImageContrast(imageAsBase64) {
-    const { contrastValue } = this.state
-
+  changeImageContrast(imageAsBase64, contrastValue) {
     return new Promise((resolve, reject) => {
       if (Platform.OS === 'android') {
         OpenCV.changeImageContrast(
@@ -92,14 +92,18 @@ export default class App extends Component<Props> {
     Alert.alert('Current Contrast Value', `${this.state.contrastValue}`)
   }
 
+  handleContrastChange = _.debounce(() => {
+    const { initialImage, contrastValue } = this.state
+    this.changeImageContrast(initialImage, contrastValue).then(data => {
+      if (data) {
+        this.setState({ processedImage64: data })
+      }
+    })
+  }, SLIDER_VALUE_DELAY)
+
   onValueChange = value =>
     this.setState({ contrastValue: +value.toFixed(1) }, () => {
-      const { initialImage } = this.state
-      this.changeImageContrast(initialImage).then(data => {
-        if (data) {
-          this.setState({ processedImage64: data })
-        }
-      })
+      this.handleContrastChange()
     })
 
   render() {
