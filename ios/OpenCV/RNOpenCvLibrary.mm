@@ -9,11 +9,16 @@
 }
 RCT_EXPORT_MODULE()
 
-RCT_EXPORT_METHOD(changeImageContrast:(NSString *)imageAsBase64 alpha:(double)alpha callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(changeImageContrast:(NSString *)imageAsBase64 contrast:(double)contrast callback:(RCTResponseSenderBlock)callback) {
   UIImage* imageUI = [self decodeBase64ToImage:imageAsBase64];
   
   cv::Mat matImage = [self cvMatFromUIImage:imageUI];
-  matImage.convertTo(matImage, matImage.type(), alpha, 0);
+
+  cv::Scalar imgAvgVec = sum(matImage) / (matImage.cols * matImage.rows);
+  double imgAvg = (imgAvgVec[0] + imgAvgVec[1] + imgAvgVec[2]) / 3;
+  int brightness = -((contrast - 1) * imgAvg);
+  
+  matImage.convertTo(matImage, matImage.type(), contrast, brightness);
 
   UIImage* new_imageUI = [self UIImageFromCVMat:matImage];
   NSString* dstBase64 = [self encodeToBase64String:new_imageUI];

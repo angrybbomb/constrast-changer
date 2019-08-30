@@ -9,6 +9,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
+import org.opencv.core.Core;
 
 import org.opencv.android.Utils;
 
@@ -30,7 +32,8 @@ public class RNOpenCvLibraryModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void changeImageContrast(String imageAsBase64, Double alpha, Callback errorCallback, Callback successCallback) {
+    public void changeImageContrast(String imageAsBase64, Double contrast, Callback errorCallback,
+            Callback successCallback) {
         try {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inDither = true;
@@ -39,11 +42,17 @@ public class RNOpenCvLibraryModule extends ReactContextBaseJavaModule {
             byte[] decodedString = Base64.decode(imageAsBase64, Base64.DEFAULT);
             Bitmap image = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
 
-
             Mat matImage = new Mat();
             Utils.bitmapToMat(image, matImage);
 
-            matImage.convertTo(matImage, matImage.type(), alpha, 0);
+            Scalar imgScalVec = Core.sumElems(matImage);
+            double[] imgAvgVec = imgScalVec.val;
+            for (int i = 0; i < imgAvgVec.length; i++) {
+                imgAvgVec[i] = imgAvgVec[i] / (matImage.cols() * matImage.rows());
+            }
+            double imgAvg = (imgAvgVec[0] + imgAvgVec[1] + imgAvgVec[2]) / 3;
+            int brightness = -(int) ((contrast - 1) * imgAvg);
+            matImage.convertTo(matImage, matImage.type(), contrast, brightness);
 
             Bitmap resultImage = Bitmap.createBitmap(image.getWidth(), image.getHeight(), image.getConfig());
             Utils.matToBitmap(matImage, resultImage);
