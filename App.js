@@ -13,7 +13,7 @@ import Slider from 'react-native-slider'
 import OpenCV from './NativeModules/OpenCV'
 
 const TestPicture = require('./assets/images/drivers-license.jpg')
-const SLIDER_VALUE_DELAY = 150
+const SLIDER_VALUE_DELAY = 15
 
 type Props = {}
 export default class App extends Component<Props> {
@@ -27,6 +27,7 @@ export default class App extends Component<Props> {
   async componentDidMount() {
     try {
       const localImgUri = await Image.resolveAssetSource(TestPicture).uri
+      console.log("TCL: App -> componentDidMount -> localImgUri", localImgUri)
 
       Image.getSize(
         localImgUri,
@@ -71,10 +72,11 @@ export default class App extends Component<Props> {
     return new Promise((resolve, reject) => {
       if (Platform.OS === 'android') {
         OpenCV.changeImageContrast(
-          imageAsBase64,
+          // imageAsBase64,
+          'https://www.publicdomainpictures.net/pictures/20000/nahled/monarch-butterfly-on-flower.jpg',
           contrastValue,
           error => {
-            console.log('TCL: App -> changeImageContrast -> error', error)
+            console.log('TCL: App -> [android] changeImageContrast -> error', error)
           },
           msg => {
             resolve(msg)

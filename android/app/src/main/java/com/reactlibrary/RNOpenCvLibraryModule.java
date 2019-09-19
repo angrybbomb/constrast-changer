@@ -15,11 +15,14 @@ import org.opencv.core.Core;
 import org.opencv.android.Utils;
 
 import android.util.Base64;
+import java.net.URL; 
 import java.io.ByteArrayOutputStream;
 
 public class RNOpenCvLibraryModule extends ReactContextBaseJavaModule {
 
     private final ReactApplicationContext reactContext;
+    private Bitmap prevFetchedImage = null;
+    private String prevFetchUrl = null;
 
     public RNOpenCvLibraryModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -32,15 +35,18 @@ public class RNOpenCvLibraryModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void changeImageContrast(String imageAsBase64, Double contrast, Callback errorCallback,
+    public void changeImageContrast(String imageUrl, Double contrast, Callback errorCallback,
             Callback successCallback) {
         try {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inDither = true;
             options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-
-            byte[] decodedString = Base64.decode(imageAsBase64, Base64.DEFAULT);
-            Bitmap image = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+            
+            if(this.prevFetchedImage == null || this.prevFetchUrl != imageUrl) {
+                URL url = new URL(imageUrl);
+                this.prevFetchedImage = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+            }
+            Bitmap image = this.prevFetchedImage;
 
             Mat matImage = new Mat();
             Utils.bitmapToMat(image, matImage);

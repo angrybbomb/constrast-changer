@@ -11,6 +11,11 @@ RCT_EXPORT_MODULE()
 
 RCT_EXPORT_METHOD(changeImageContrast:(NSString *)imageAsBase64 contrast:(double)contrast callback:(RCTResponseSenderBlock)callback) {
   UIImage* imageUI = [self decodeBase64ToImage:imageAsBase64];
+
+  // NSData* imageData = [[NSData alloc] initWithContentsOfURL: [NSURL URLWithString: @"https://www.google.com.ua/search?q=image&sxsrf=ACYBGNQ0eHzaC60ij96y9xWR4Kt1EUlo2w:1568880116151&source=lnms&tbm=isch&sa=X&ved=0ahUKEwi_vZLwtdzkAhWnpYsKHT-_C3gQ_AUIEigB&biw=2088&bih=963#imgdii=Ovvz-bIIAP969M:&imgrc=G8Tx9wNoWYOx2M:"]];
+  // // RCTLogInfo(@"imageData: %@", imageData);
+  // // [imageData release];
+  // cv::Mat matImage = cv::imdecode(cv::Mat(1, (int)[imageData length], CV_8UC1, (void*)imageData.bytes), CV_LOAD_IMAGE_UNCHANGED);
   
   cv::Mat matImage = [self cvMatFromUIImage:imageUI];
 
