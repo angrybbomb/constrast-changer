@@ -8,9 +8,9 @@
 
 import _ from 'lodash'
 import React, { Component } from 'react'
-import { Platform, StyleSheet, Text, View, TouchableOpacity, Image, ImageEditor, ImageStore, Alert } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, Image, Alert } from 'react-native'
 import Slider from 'react-native-slider'
-import OpenCV from './NativeModules/OpenCV'
+import ContrastChangingImage from './NativeModules/ContrastChangingImage'
 
 const TestPicture = require('./assets/images/drivers-license.jpg')
 const SLIDER_VALUE_DELAY = 15
@@ -18,98 +18,18 @@ const SLIDER_VALUE_DELAY = 15
 type Props = {}
 export default class App extends Component<Props> {
   state = {
-    initialImage: null,
-    localImageTag: null,
-    processedImage64: null,
+    imgUrl: 'https://www.publicdomainpictures.net/pictures/20000/nahled/monarch-butterfly-on-flower.jpg',
     contrastValue: 1,
-  }
-
-  async componentDidMount() {
-    try {
-      const localImgUri = await Image.resolveAssetSource(TestPicture).uri
-      console.log("TCL: App -> componentDidMount -> localImgUri", localImgUri)
-
-      Image.getSize(
-        localImgUri,
-        (width, height) => {
-          ImageEditor.cropImage(
-            localImgUri,
-            {
-              offset: { x: 0, y: 0 },
-              size: { width, height },
-            },
-            croppedUri => {
-              this.setState({ localImageTag: croppedUri })
-              ImageStore.getBase64ForTag(
-                croppedUri,
-                localImgBase64 => {
-                  this.setState({ initialImage: localImgBase64, processedImage64: localImgBase64 })
-                },
-                errorBase64 => {
-                  console.log('TCL: App -> componentDidMount -> errorBase64', errorBase64)
-                }
-              )
-            },
-            errorCrop => {
-              console.log('TCL: App -> componentDidMount -> errorCrop', errorCrop)
-            }
-          )
-        },
-        errorSize => {
-          console.log('TCL: App -> componentDidMount -> errorSize', errorSize)
-        }
-      )
-    } catch (error) {
-      console.log('TCL: App -> componentDidMount -> error', error)
-    }
-  }
-
-  componentWillUnmount() {
-    ImageStore.removeImageForTag(this.state.localImageTag)
-  }
-
-  changeImageContrast(imageAsBase64, contrastValue) {
-    return new Promise((resolve, reject) => {
-      if (Platform.OS === 'android') {
-        OpenCV.changeImageContrast(
-          // imageAsBase64,
-          'https://www.publicdomainpictures.net/pictures/20000/nahled/monarch-butterfly-on-flower.jpg',
-          contrastValue,
-          error => {
-            console.log('TCL: App -> [android] changeImageContrast -> error', error)
-          },
-          msg => {
-            resolve(msg)
-          }
-        )
-      } else {
-        OpenCV.changeImageContrast(imageAsBase64, contrastValue, (error, dataArray) => {
-          resolve(dataArray[0])
-        })
-      }
-    })
   }
 
   handleSave = () => {
     Alert.alert('Current Contrast Value', `${this.state.contrastValue}`)
   }
 
-  handleContrastChange = _.debounce(() => {
-    const { initialImage, contrastValue } = this.state
-    this.changeImageContrast(initialImage, contrastValue).then(data => {
-      if (data) {
-        this.setState({ processedImage64: data })
-      }
-    })
-  }, SLIDER_VALUE_DELAY)
-
-  onValueChange = value =>
-    this.setState({ contrastValue: +value.toFixed(1) }, () => {
-      this.handleContrastChange()
-    })
+  onValueChange = value => this.setState({ contrastValue: +value.toFixed(1) })
 
   render() {
-    const { contrastValue, processedImage64 } = this.state
+    const { contrastValue, imgUrl } = this.state
 
     return (
       <View style={styles.container}>
@@ -127,13 +47,7 @@ export default class App extends Component<Props> {
           maximumTrackTintColor={'#5E82BC'}
         />
         <Text style={styles.instructions}>Move the slider left or right</Text>
-        {processedImage64 && (
-          <Image
-            style={{ height: 300, width: 300 }}
-            source={{ uri: `data:image/png;base64,${processedImage64}` }}
-            resizeMode="contain"
-          />
-        )}
+        <ContrastChangingImage style={styles.image} contrast={contrastValue} url={imgUrl} />
         <TouchableOpacity onPress={this.handleSave}>
           <Text style={styles.title}>Save</Text>
         </TouchableOpacity>
@@ -169,5 +83,9 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.3,
     shadowRadius: 2,
+  },
+  image: {
+    height: 300,
+    width: 300,
   },
 })
