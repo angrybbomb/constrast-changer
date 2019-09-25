@@ -2,28 +2,26 @@
 
 @implementation RNContrastChangingImageView
   UIImageView *mUIImageView = nil;
-  UIImage *mImgUI = nil;
   UIImage *fetchedImgUI = nil;
+  UIImage *mImgUI = nil;
   NSString *url = nil;
   float contrast = 1.0;
 
-
-//UIImage *mImgUI = nil;
-//UIImage *fetchedImgUI = nil;
-//NSString *url = nil;
-//float contrast = 1.0;
-
-- (UIImageView *)view {
-  mImgUI = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:@"https://www.publicdomainpictures.net/pictures/20000/nahled/monarch-butterfly-on-flower.jpg"]]];
+- (RNContrastChangingImageView *)init {
   mUIImageView = [[UIImageView alloc] init];
   
-  [mUIImageView setImage:mImgUI];
+  NSLog(@"[RNContrastChangingImageView] -view");
+  
+  [self setFetchUrl:@"https://www.publicdomainpictures.net/pictures/20000/nahled/monarch-butterfly-on-flower.jpg"];
+  [self setContrast:2.0];
+  
   return mUIImageView;
 }
 
 - (void)setFetchUrl:(NSString *)imgUrl {
   if (![imgUrl isEqualToString: url]) {
     url = imgUrl;
+    [self downloadImage:url];
   }
 }
 
@@ -32,7 +30,14 @@
 }
 
 - (void)downloadImage:(NSString *)imgUrl {
-  fetchedImgUI = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:imgUrl]]];
+  dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul);
+  dispatch_async(queue, ^{
+    NSData * imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
+    dispatch_async(dispatch_get_main_queue(), ^{
+      fetchedImgUI = [UIImage imageWithData:imageData];
+      [self changeImageContrast];
+    });
+  });
 }
 
 - (void) changeImageContrast {
@@ -46,8 +51,11 @@
   
   matImage.convertTo(matImage, matImage.type(), contrast, brightness);
   
-  UIImage* new_imageUI = [self UIImageFromCVMat:matImage];
-  mImgUI = new_imageUI;
+//  UIImage* new_imageUI = [self UIImageFromCVMat:matImage];
+//  mImgUI = new_imageUI;
+  
+  mImgUI = [self UIImageFromCVMat:matImage];
+  [mUIImageView setImage:mImgUI];
 }
 
 - (UIImage *)decodeBase64ToImage:(NSString *)strEncodeData {
