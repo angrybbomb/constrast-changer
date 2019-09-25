@@ -53,7 +53,7 @@ public class RNContrastChangingImageView extends AppCompatImageView {
         }
     }
 
-    public void downloadImage(String imgUrl) {
+    private void downloadImage(String imgUrl) {
         DownloadImage task = new DownloadImage();
 
         Bitmap result = null;

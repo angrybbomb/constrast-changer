@@ -1,37 +1,53 @@
 #import "RNOpenCvLibrary.h"
-#import <React/RCTLog.h>
 
-@implementation RNOpenCvLibrary
+@implementation RNContrastChangingImageView
+  UIImageView *mUIImageView = nil;
+  UIImage *mImgUI = nil;
+  UIImage *fetchedImgUI = nil;
+  NSString *url = nil;
+  float contrast = 1.0;
 
-- (dispatch_queue_t)methodQueue
-{
-  return dispatch_get_main_queue();
+
+//UIImage *mImgUI = nil;
+//UIImage *fetchedImgUI = nil;
+//NSString *url = nil;
+//float contrast = 1.0;
+
+- (UIImageView *)view {
+  mImgUI = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:@"https://www.publicdomainpictures.net/pictures/20000/nahled/monarch-butterfly-on-flower.jpg"]]];
+  mUIImageView = [[UIImageView alloc] init];
+  
+  [mUIImageView setImage:mImgUI];
+  return mUIImageView;
 }
-RCT_EXPORT_MODULE()
 
-RCT_EXPORT_METHOD(changeImageContrast:(NSString *)imageAsBase64 contrast:(double)contrast callback:(RCTResponseSenderBlock)callback) {
-  UIImage* imageUI = [self decodeBase64ToImage:imageAsBase64];
+- (void)setFetchUrl:(NSString *)imgUrl {
+  if (![imgUrl isEqualToString: url]) {
+    url = imgUrl;
+  }
+}
 
-  // NSData* imageData = [[NSData alloc] initWithContentsOfURL: [NSURL URLWithString: @"https://www.google.com.ua/search?q=image&sxsrf=ACYBGNQ0eHzaC60ij96y9xWR4Kt1EUlo2w:1568880116151&source=lnms&tbm=isch&sa=X&ved=0ahUKEwi_vZLwtdzkAhWnpYsKHT-_C3gQ_AUIEigB&biw=2088&bih=963#imgdii=Ovvz-bIIAP969M:&imgrc=G8Tx9wNoWYOx2M:"]];
-  // // RCTLogInfo(@"imageData: %@", imageData);
-  // // [imageData release];
-  // cv::Mat matImage = cv::imdecode(cv::Mat(1, (int)[imageData length], CV_8UC1, (void*)imageData.bytes), CV_LOAD_IMAGE_UNCHANGED);
+- (void)setContrast:(float)value {
+  contrast = value;
+}
+
+- (void)downloadImage:(NSString *)imgUrl {
+  fetchedImgUI = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:imgUrl]]];
+}
+
+- (void) changeImageContrast {
+  UIImage* imageUI = fetchedImgUI;
   
   cv::Mat matImage = [self cvMatFromUIImage:imageUI];
-
+  
   cv::Scalar imgAvgVec = sum(matImage) / (matImage.cols * matImage.rows);
   double imgAvg = (imgAvgVec[0] + imgAvgVec[1] + imgAvgVec[2]) / 3;
   int brightness = -((contrast - 1) * imgAvg);
   
   matImage.convertTo(matImage, matImage.type(), contrast, brightness);
-
+  
   UIImage* new_imageUI = [self UIImageFromCVMat:matImage];
-  NSString* dstBase64 = [self encodeToBase64String:new_imageUI];
-  
-  id object = { dstBase64 };
-  NSArray *array = [NSArray arrayWithObject:object];
-  
-  callback(@[[NSNull null], array]);
+  mImgUI = new_imageUI;
 }
 
 - (UIImage *)decodeBase64ToImage:(NSString *)strEncodeData {
@@ -121,3 +137,4 @@ RCT_EXPORT_METHOD(changeImageContrast:(NSString *)imageAsBase64 contrast:(double
 }
 
 @end
+

@@ -4,8 +4,9 @@
 #import <React/RCTBridgeModule.h>
 #endif
 
+#import <UIKit/UIKit.h>
 #import <opencv2/imgproc/imgproc.hpp>
 
-@interface RNOpenCvLibrary : NSObject <RCTBridgeModule>
+@interface RNContrastChangingImageView : UIImageView
 
 @end
