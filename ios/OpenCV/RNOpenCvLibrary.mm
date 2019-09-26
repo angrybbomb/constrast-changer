@@ -1,39 +1,68 @@
 #import "RNOpenCvLibrary.h"
 
-@implementation RNContrastChangingImageView
-  UIImageView *mUIImageView = nil;
-  UIImage *fetchedImgUI = nil;
-  UIImage *mImgUI = nil;
-  NSString *url = nil;
-  float contrast = 1.0;
 
-- (RNContrastChangingImageView *)init {
-  mUIImageView = [[UIImageView alloc] init];
+@implementation RNContrastChangingImageView
+//  UIImageView *mUIImageView = nil;
+//  UIImage *fetchedImgUI = nil;
+//  UIImage *mUIImg = nil;
+//  NSString *url = nil;
+//  float contrast = 1.0;
+
+- (instancetype)init {
+//  return [self init];
   
-  NSLog(@"[RNContrastChangingImageView] -view");
-  
-  [self setFetchUrl:@"https://www.publicdomainpictures.net/pictures/20000/nahled/monarch-butterfly-on-flower.jpg"];
-  [self setContrast:2.0];
-  
+  if (self = [super init]) {
+    mUIImageView = nil;
+    mUIImg = nil;
+    fetchedImgUI = nil;
+//    _url = nil;
+//    _contrast = 1.0;
+    return self;
+  } else {
+    return nil;
+  }
+}
+
+- (UIView *)view {
   return mUIImageView;
 }
 
-- (void)setFetchUrl:(NSString *)imgUrl {
-  if (![imgUrl isEqualToString: url]) {
-    url = imgUrl;
-    [self downloadImage:url];
+- (RNContrastChangingImageView *)getView {
+  NSLog(@"[RNContrastChangingImageView] -getView");
+  
+  mUIImageView = [[UIImageView alloc] init];
+//  [mUIImageView setImage:mUIImg];
+
+  return mUIImageView;
+}
+
+- (void)setUrl:(NSString *)imgUrl {
+  if (![imgUrl isEqualToString:self.url]) {
+    NSLog(@"{ChangingImageView} setUrl !!!");
+    NSLog(imgUrl);
+    
+    [self downloadImage:imgUrl];
   }
 }
 
 - (void)setContrast:(float)value {
-  contrast = value;
+  NSLog(@"{ChangingImageView} setContrast !!!");
+  NSLog(@"%f", value);
+  
+  if (self.url != nil) {
+//    [self changeImageContrast];
+  }
 }
 
 - (void)downloadImage:(NSString *)imgUrl {
+  NSLog(@"{ChangingImageView} downloadImage:  %@", imgUrl);
+  
   dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul);
   dispatch_async(queue, ^{
-    NSData * imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
+    NSData * imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[imgUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
     dispatch_async(dispatch_get_main_queue(), ^{
+      NSLog(@"{ChangingImageView} imageData:  %@", imageData);
+      
       fetchedImgUI = [UIImage imageWithData:imageData];
       [self changeImageContrast];
     });
@@ -41,21 +70,23 @@
 }
 
 - (void) changeImageContrast {
-  UIImage* imageUI = fetchedImgUI;
+  NSLog(@"{ChangingImageView} changeImageContrast");
   
-  cv::Mat matImage = [self cvMatFromUIImage:imageUI];
-  
-  cv::Scalar imgAvgVec = sum(matImage) / (matImage.cols * matImage.rows);
-  double imgAvg = (imgAvgVec[0] + imgAvgVec[1] + imgAvgVec[2]) / 3;
-  int brightness = -((contrast - 1) * imgAvg);
-  
-  matImage.convertTo(matImage, matImage.type(), contrast, brightness);
-  
-//  UIImage* new_imageUI = [self UIImageFromCVMat:matImage];
-//  mImgUI = new_imageUI;
-  
-  mImgUI = [self UIImageFromCVMat:matImage];
-  [mUIImageView setImage:mImgUI];
+  if (self.url && fetchedImgUI) {
+    UIImage* imageUI = fetchedImgUI;
+    
+    cv::Mat matImage = [self cvMatFromUIImage:imageUI];
+    
+    cv::Scalar imgAvgVec = sum(matImage) / (matImage.cols * matImage.rows);
+    double imgAvg = (imgAvgVec[0] + imgAvgVec[1] + imgAvgVec[2]) / 3;
+    int brightness = -((self.contrast - 1) * imgAvg);
+    
+    matImage.convertTo(matImage, matImage.type(), self.contrast, brightness);
+    
+    mUIImg = [self UIImageFromCVMat:matImage];
+    NSLog(@"{ChangingImageView} mUIImg: %@", mUIImg);
+    [mUIImageView setImage:mUIImg];
+  }
 }
 
 - (UIImage *)decodeBase64ToImage:(NSString *)strEncodeData {

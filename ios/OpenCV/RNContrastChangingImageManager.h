@@ -7,9 +7,14 @@
 #import <UIKit/UIKit.h>
 
 #import <React/RCTViewManager.h>
+#import <React/RCTLog.h>
 #import "RNOpenCvLibrary.h"
 
-@interface RNContrastChangingImageManager : RCTViewManager
-//RCT_EXPORT_VIEW_PROPERTY(url, NSString)
-//RCT_EXPORT_VIEW_PROPERTY(contrast, float)
+@interface RNContrastChangingImageManager : RCTViewManager {
+//  RNContrastChangingImageView* contrastChangingImageView;
+}
+//@property (nonatomic, retain, setter = setUrl:) NSString *url;
+//@property (setter = setContrast:) float contrast;
+//- (void)setUrl:(NSString *)imgUrl;
+//- (void)setContrast:(float)value;
 @end
