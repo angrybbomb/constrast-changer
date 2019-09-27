@@ -7,8 +7,7 @@
 #import <UIKit/UIKit.h>
 
 #import <React/RCTViewManager.h>
-#import <React/RCTLog.h>
-#import "RNOpenCvLibrary.h"
+#import "RNContrastChangingImageView.h"
 
 @interface RNContrastChangingImageManager : RCTViewManager
 
