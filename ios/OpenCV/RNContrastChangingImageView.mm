@@ -1,4 +1,4 @@
-#import "RNOpenCvLibrary.h"
+#import "RNContrastChangingImageView.h"
 
 @implementation RNContrastChangingImageView
 
