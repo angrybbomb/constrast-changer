@@ -2,55 +2,39 @@
 
 
 @implementation RNContrastChangingImageView
-//  UIImageView *mUIImageView = nil;
-//  UIImage *fetchedImgUI = nil;
-//  UIImage *mUIImg = nil;
-//  NSString *url = nil;
-//  float contrast = 1.0;
+  UIImage *fetchedImgUI = nil;
+  NSData *fetchedImageData = nil;
+  UIImage *mUIImg = nil;
 
 - (instancetype)init {
-//  return [self init];
-  
   if (self = [super init]) {
-    mUIImageView = nil;
-    mUIImg = nil;
+    _url = nil;
     fetchedImgUI = nil;
-//    _url = nil;
-//    _contrast = 1.0;
+    mUIImg = nil;
+    [self setContrast:1.0];
+    [self setImage:mUIImg];
     return self;
   } else {
     return nil;
   }
 }
 
-- (UIView *)view {
-  return mUIImageView;
-}
-
-- (RNContrastChangingImageView *)getView {
-  NSLog(@"[RNContrastChangingImageView] -getView");
-  
-  mUIImageView = [[UIImageView alloc] init];
-//  [mUIImageView setImage:mUIImg];
-
-  return mUIImageView;
-}
-
 - (void)setUrl:(NSString *)imgUrl {
   if (![imgUrl isEqualToString:self.url]) {
-    NSLog(@"{ChangingImageView} setUrl !!!");
-    NSLog(imgUrl);
+    NSLog(@"{ChangingImageView} setUrl: %@ !!!", imgUrl);
     
     [self downloadImage:imgUrl];
   }
 }
 
 - (void)setContrast:(float)value {
-  NSLog(@"{ChangingImageView} setContrast !!!");
-  NSLog(@"%f", value);
+  NSLog(@"{ChangingImageView} setContrast: %f !!!", value);
   
-  if (self.url != nil) {
-//    [self changeImageContrast];
+  _contrast = value;
+  if (!fetchedImgUI && self.url) {
+    [self downloadImage:self.url];
+  } else {
+    [self changeImageContrast];
   }
 }
 
@@ -64,6 +48,7 @@
       NSLog(@"{ChangingImageView} imageData:  %@", imageData);
       
       fetchedImgUI = [UIImage imageWithData:imageData];
+      mUIImg = [UIImage imageWithData:imageData]; // posibility of blinking image
       [self changeImageContrast];
     });
   });
@@ -72,7 +57,7 @@
 - (void) changeImageContrast {
   NSLog(@"{ChangingImageView} changeImageContrast");
   
-  if (self.url && fetchedImgUI) {
+  if (fetchedImgUI) {
     UIImage* imageUI = fetchedImgUI;
     
     cv::Mat matImage = [self cvMatFromUIImage:imageUI];
@@ -83,9 +68,9 @@
     
     matImage.convertTo(matImage, matImage.type(), self.contrast, brightness);
     
-    mUIImg = [self UIImageFromCVMat:matImage];
     NSLog(@"{ChangingImageView} mUIImg: %@", mUIImg);
-    [mUIImageView setImage:mUIImg];
+    mUIImg = [self UIImageFromCVMat:matImage];
+    [self setImage:mUIImg];
   }
 }
 

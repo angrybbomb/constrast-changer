@@ -9,11 +9,9 @@
 #import <React/RCTLog.h>
 
 @interface RNContrastChangingImageView : UIImageView {
-  UIImageView *mUIImageView;
-  UIImage *mUIImg;
-  UIImage *fetchedImgUI;
-//  NSString *url;
-//  float contrast;
+//  UIImageView *mUIImageView;
+//  UIImage *mUIImg;
+//  UIImage *fetchedImgUI;
 }
 @property (nonatomic, retain, setter = setUrl:) NSString *url;
 @property (nonatomic, setter = setContrast:) float contrast;
