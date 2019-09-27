@@ -7,6 +7,7 @@
     fetchedImageData = nil;
     _url = nil;
     _contrast = 1.0;
+    [self setContentMode:UIViewContentModeScaleAspectFit];
     return self;
   } else {
     return nil;
