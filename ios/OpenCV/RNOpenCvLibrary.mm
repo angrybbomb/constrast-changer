@@ -1,18 +1,12 @@
 #import "RNOpenCvLibrary.h"
 
-
 @implementation RNContrastChangingImageView
-  UIImage *fetchedImgUI = nil;
-  NSData *fetchedImageData = nil;
-  UIImage *mUIImg = nil;
 
 - (instancetype)init {
   if (self = [super init]) {
+    fetchedImageData = nil;
     _url = nil;
-    fetchedImgUI = nil;
-    mUIImg = nil;
-    [self setContrast:1.0];
-    [self setImage:mUIImg];
+    _contrast = 1.0;
     return self;
   } else {
     return nil;
@@ -21,45 +15,34 @@
 
 - (void)setUrl:(NSString *)imgUrl {
   if (![imgUrl isEqualToString:self.url]) {
-    NSLog(@"{ChangingImageView} setUrl: %@ !!!", imgUrl);
-    
-    [self downloadImage:imgUrl];
+    _url = imgUrl;
+    [self downloadImageBy:imgUrl];
   }
 }
 
 - (void)setContrast:(float)value {
-  NSLog(@"{ChangingImageView} setContrast: %f !!!", value);
-  
   _contrast = value;
-  if (!fetchedImgUI && self.url) {
-    [self downloadImage:self.url];
+  if (!self->fetchedImageData && self.url) {
+    [self downloadImageBy:self.url];
   } else {
     [self changeImageContrast];
   }
 }
 
-- (void)downloadImage:(NSString *)imgUrl {
-  NSLog(@"{ChangingImageView} downloadImage:  %@", imgUrl);
-  
+- (void)downloadImageBy:(NSString *)urlStr {
   dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul);
   dispatch_async(queue, ^{
-    NSData * imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[imgUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
+    NSURL *imgURL = [NSURL URLWithString:[urlStr stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLFragmentAllowedCharacterSet]]];
+    self->fetchedImageData = [NSData dataWithContentsOfURL:imgURL];
     dispatch_async(dispatch_get_main_queue(), ^{
-      NSLog(@"{ChangingImageView} imageData:  %@", imageData);
-      
-      fetchedImgUI = [UIImage imageWithData:imageData];
-      mUIImg = [UIImage imageWithData:imageData]; // posibility of blinking image
       [self changeImageContrast];
     });
   });
 }
 
 - (void) changeImageContrast {
-  NSLog(@"{ChangingImageView} changeImageContrast");
-  
-  if (fetchedImgUI) {
-    UIImage* imageUI = fetchedImgUI;
-    
+  if (self->fetchedImageData) {
+    UIImage* imageUI = [UIImage imageWithData:self->fetchedImageData];
     cv::Mat matImage = [self cvMatFromUIImage:imageUI];
     
     cv::Scalar imgAvgVec = sum(matImage) / (matImage.cols * matImage.rows);
@@ -67,10 +50,7 @@
     int brightness = -((self.contrast - 1) * imgAvg);
     
     matImage.convertTo(matImage, matImage.type(), self.contrast, brightness);
-    
-    NSLog(@"{ChangingImageView} mUIImg: %@", mUIImg);
-    mUIImg = [self UIImageFromCVMat:matImage];
-    [self setImage:mUIImg];
+    [self setImage:[self UIImageFromCVMat:matImage]];
   }
 }
 
@@ -161,4 +141,3 @@
 }
 
 @end
-

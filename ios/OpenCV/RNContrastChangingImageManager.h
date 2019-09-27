@@ -10,11 +10,6 @@
 #import <React/RCTLog.h>
 #import "RNOpenCvLibrary.h"
 
-@interface RNContrastChangingImageManager : RCTViewManager {
-//  RNContrastChangingImageView* contrastChangingImageView;
-}
-//@property (nonatomic, retain, setter = setUrl:) NSString *url;
-//@property (setter = setContrast:) float contrast;
-//- (void)setUrl:(NSString *)imgUrl;
-//- (void)setContrast:(float)value;
+@interface RNContrastChangingImageManager : RCTViewManager
+
 @end
