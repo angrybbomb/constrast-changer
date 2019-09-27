@@ -544,11 +544,11 @@
 		4993D351233A057C00D8CC1C /* OpenCV */ = {
 			isa = PBXGroup;
 			children = (
-				4993D395233A607E00D8CC1C /* RNContrastChangingImageView.h */,
-				4993D394233A607E00D8CC1C /* RNContrastChangingImageView.mm */,
-				4993D354233A057C00D8CC1C /* PrefixHeader.pch */,
 				4993D36E233A457000D8CC1C /* RNContrastChangingImageManager.h */,
 				4993D35C233A120A00D8CC1C /* RNContrastChangingImageManager.mm */,
+				4993D354233A057C00D8CC1C /* PrefixHeader.pch */,
+				4993D395233A607E00D8CC1C /* RNContrastChangingImageView.h */,
+				4993D394233A607E00D8CC1C /* RNContrastChangingImageView.mm */,
 			);
 			path = OpenCV;
 			sourceTree = "<group>";
