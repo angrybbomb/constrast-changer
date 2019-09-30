@@ -25,4 +25,9 @@ public class RNContrastChangingImageManager extends SimpleViewManager<RNContrast
     public void setContrastValue(RNContrastChangingImageView view, float contrast) {
         view.setContrast(contrast);
     }
+
+    @ReactProp(name = "resizeMode")
+    public void setResizeMode(RNContrastChangingImageView view, String mode) {
+        view.setResizeMode(mode);
+    }
 }

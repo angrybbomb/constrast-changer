@@ -53,6 +53,21 @@ public class RNContrastChangingImageView extends AppCompatImageView {
         }
     }
 
+    public void setResizeMode(String mode) {
+        switch (mode) {
+            case "cover":
+                this.setScaleType(ScaleType.CENTER_CROP);
+                break;
+            case "stretch":
+                this.setScaleType(ScaleType.FIT_XY);
+                break;
+            case "contain":
+            default:
+                this.setScaleType(ScaleType.FIT_CENTER);
+                break;
+        }
+    }
+
     private void downloadImage(String imgUrl) {
         DownloadImage task = new DownloadImage();
 

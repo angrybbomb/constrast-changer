@@ -15,14 +15,12 @@
 }
 
 - (void)setResizeMode: (NSString *)mode {
-  if ([mode isEqualToString:@"cover"]){
-    [self setContentMode:UIViewContentModeScaleAspectFill];
-  } else if ([mode isEqualToString:@"contain"]){
+  if ([mode isEqualToString:@"contain"]){
     [self setContentMode:UIViewContentModeScaleAspectFit];
+  } else if ([mode isEqualToString:@"cover"]){
+    [self setContentMode:UIViewContentModeScaleAspectFill];
   } else if ([mode isEqualToString:@"stretch"]){
     [self setContentMode:UIViewContentModeScaleToFill];
-  } else if ([mode isEqualToString:@"center"]){
-    [self setContentMode:UIViewContentModeCenter];
   }
 }
 

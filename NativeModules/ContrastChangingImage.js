@@ -11,7 +11,11 @@ class ContrastChangingImage extends React.Component {
 ContrastChangingImage.propTypes = {
   url: PropTypes.string.isRequired,
   contrast: PropTypes.number.isRequired,
-  resizeMode: PropTypes.string,
+  /**
+   * Determines how to resize the image when the frame doesn't match the raw image dimensions.
+   * enum('contain', 'cover', 'stretch') with 'contain' value by default.
+   */
+  resizeMode: PropTypes.oneOf(['contain', 'cover', 'stretch']),
 }
 
 ContrastChangingImage.defaultProps = {
