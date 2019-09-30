@@ -11,6 +11,11 @@ class ContrastChangingImage extends React.Component {
 ContrastChangingImage.propTypes = {
   url: PropTypes.string.isRequired,
   contrast: PropTypes.number.isRequired,
+  resizeMode: PropTypes.string,
+}
+
+ContrastChangingImage.defaultProps = {
+  resizeMode: 'contain',
 }
 
 var RNContrastChangingImage = requireNativeComponent('RNContrastChangingImage', ContrastChangingImage)

@@ -10,6 +10,7 @@ RCT_EXPORT_MODULE(RNContrastChangingImage)
   return [[RNContrastChangingImageView alloc] init];
 }
 
+RCT_EXPORT_VIEW_PROPERTY(resizeMode, NSString *);
 RCT_EXPORT_VIEW_PROPERTY(url, NSString *);
 RCT_EXPORT_VIEW_PROPERTY(contrast, float);
 

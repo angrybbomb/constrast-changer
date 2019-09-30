@@ -10,6 +10,7 @@
 @interface RNContrastChangingImageView : UIImageView {
   NSData *fetchedImageData;
 }
+@property (nonatomic, retain, setter = setResizeMode:) NSString *resizeMode;
 @property (nonatomic, retain, setter = setUrl:) NSString *url;
 @property (nonatomic, setter = setContrast:) float contrast;
 @end
