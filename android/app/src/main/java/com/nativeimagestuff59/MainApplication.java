@@ -9,7 +9,6 @@ import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
 
 import com.reactlibrary.RNContrastChangingImagePackage;
-import com.reactlibrary.RNOpenCvLibraryPackage;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -33,8 +32,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
-              new RNContrastChangingImagePackage(),
-              new RNOpenCvLibraryPackage()
+              new RNContrastChangingImagePackage()
       );
     }
 
