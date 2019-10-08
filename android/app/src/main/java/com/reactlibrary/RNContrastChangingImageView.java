@@ -30,14 +30,6 @@ public class RNContrastChangingImageView extends AppCompatImageView {
         super(context);
     }
 
-    public RNContrastChangingImageView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
-
-    public RNContrastChangingImageView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-    }
-
     public void setFetchUrl(String imgUrl) {
         if (imgUrl != fetchUrl) {
             fetchUrl = imgUrl;
