@@ -60,21 +60,6 @@ public class RNContrastChangingImageView extends AppCompatImageView {
         }
     }
 
-    private void downloadImage(String imgUrl) {
-        DownloadImage task = new DownloadImage();
-
-        Bitmap result = null;
-        try {
-            result = task.execute(imgUrl).get();
-        }
-        catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-
-        fetchedImage = result;
-        this.setImageBitmap(result);
-    }
-
     private void updateImageContrast() {
         try {
             Mat matImage = new Mat();
@@ -96,6 +81,21 @@ public class RNContrastChangingImageView extends AppCompatImageView {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void downloadImage(String imgUrl) {
+        DownloadImage task = new DownloadImage();
+
+        Bitmap result = null;
+        try {
+            result = task.execute(imgUrl).get();
+        }
+        catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        fetchedImage = result;
+        this.setImageBitmap(result);
     }
 
     class DownloadImage extends AsyncTask<String, Void, Bitmap> {
