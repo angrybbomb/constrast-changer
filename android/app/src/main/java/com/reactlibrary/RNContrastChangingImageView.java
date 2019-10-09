@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.util.AttributeSet;
 import android.support.v7.widget.AppCompatImageView;
 
 import org.opencv.android.Utils;
@@ -22,7 +21,7 @@ import java.util.concurrent.ExecutionException;
 
 public class RNContrastChangingImageView extends AppCompatImageView {
 
-    private Bitmap fetchedImage = null;
+    private Bitmap fetchedImageData = null;
     private String fetchUrl = null;
     private double contrast = 1;
 
@@ -40,7 +39,7 @@ public class RNContrastChangingImageView extends AppCompatImageView {
     public void setContrast(double contrastVal) {
         this.contrast = contrastVal;
 
-        if (this.fetchedImage != null) {
+        if (fetchedImageData != null) {
             this.updateImageContrast();
         }
     }
@@ -63,7 +62,7 @@ public class RNContrastChangingImageView extends AppCompatImageView {
     private void updateImageContrast() {
         try {
             Mat matImage = new Mat();
-            Utils.bitmapToMat(fetchedImage, matImage);
+            Utils.bitmapToMat(fetchedImageData, matImage);
 
             Scalar imgScalVec = Core.sumElems(matImage);
             double[] imgAvgVec = imgScalVec.val;
@@ -74,7 +73,11 @@ public class RNContrastChangingImageView extends AppCompatImageView {
             int brightness = -(int) ((contrast - 1) * imgAvg);
             matImage.convertTo(matImage, matImage.type(), contrast, brightness);
 
-            Bitmap resultImage = Bitmap.createBitmap(fetchedImage.getWidth(), fetchedImage.getHeight(), fetchedImage.getConfig());
+            Bitmap resultImage = Bitmap.createBitmap(
+                fetchedImageData.getWidth(),
+                fetchedImageData.getHeight(),
+                fetchedImageData.getConfig()
+            );
             Utils.matToBitmap(matImage, resultImage);
 
             this.setImageBitmap(resultImage);
@@ -94,7 +97,7 @@ public class RNContrastChangingImageView extends AppCompatImageView {
             e.printStackTrace();
         }
 
-        fetchedImage = result;
+        fetchedImageData = result;
         this.setImageBitmap(result);
     }
 
