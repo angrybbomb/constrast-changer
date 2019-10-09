@@ -30,8 +30,8 @@ public class RNContrastChangingImageView extends AppCompatImageView {
     }
 
     public void setFetchUrl(String imgUrl) {
-        if (imgUrl != fetchUrl) {
-            fetchUrl = imgUrl;
+        if (imgUrl != this.fetchUrl) {
+            this.fetchUrl = imgUrl;
             downloadImage(imgUrl);
         }
     }
@@ -39,7 +39,7 @@ public class RNContrastChangingImageView extends AppCompatImageView {
     public void setContrast(double contrastVal) {
         this.contrast = contrastVal;
 
-        if (fetchedImageData != null) {
+        if (this.fetchedImageData != null) {
             this.updateImageContrast();
         }
     }
@@ -62,7 +62,7 @@ public class RNContrastChangingImageView extends AppCompatImageView {
     private void updateImageContrast() {
         try {
             Mat matImage = new Mat();
-            Utils.bitmapToMat(fetchedImageData, matImage);
+            Utils.bitmapToMat(this.fetchedImageData, matImage);
 
             Scalar imgScalVec = Core.sumElems(matImage);
             double[] imgAvgVec = imgScalVec.val;
@@ -70,13 +70,13 @@ public class RNContrastChangingImageView extends AppCompatImageView {
                 imgAvgVec[i] = imgAvgVec[i] / (matImage.cols() * matImage.rows());
             }
             double imgAvg = (imgAvgVec[0] + imgAvgVec[1] + imgAvgVec[2]) / 3;
-            int brightness = -(int) ((contrast - 1) * imgAvg);
-            matImage.convertTo(matImage, matImage.type(), contrast, brightness);
+            int brightness = -(int) ((this.contrast - 1) * imgAvg);
+            matImage.convertTo(matImage, matImage.type(), this.contrast, brightness);
 
             Bitmap resultImage = Bitmap.createBitmap(
-                fetchedImageData.getWidth(),
-                fetchedImageData.getHeight(),
-                fetchedImageData.getConfig()
+                this.fetchedImageData.getWidth(),
+                this.fetchedImageData.getHeight(),
+                this.fetchedImageData.getConfig()
             );
             Utils.matToBitmap(matImage, resultImage);
 
@@ -97,7 +97,7 @@ public class RNContrastChangingImageView extends AppCompatImageView {
             e.printStackTrace();
         }
 
-        fetchedImageData = result;
+        this.fetchedImageData = result;
         this.setImageBitmap(result);
     }
 
